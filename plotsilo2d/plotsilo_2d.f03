@@ -6,7 +6,7 @@ program mesh3d
 
     implicit none
       
-    include "silo_f9x.inc"
+    include "silo.inc"
 
     character(4) :: arg1, arg2
     character(6) :: arg3
@@ -14,15 +14,17 @@ program mesh3d
     character(18) :: arg6, arg7, arg8
     character(120) :: arg4
     character(7) :: arg9, arg10, arg11
+    character(5) :: arg12
     character (len=120) :: filename
     character (len=120) :: workpath
     character (len=120) :: output_fname
     character (len=2) :: folder_name
     character (len=18) :: fname_re0, fname_re1, fname_im1
     character (len=10) :: var
+    character (len=5) :: coord
 
     integer :: n_row, n_col
-    integer :: col ,row
+    integer :: col ,row, fac1, fac2
 !     integer, parameter :: hei = 2400 ! colomns (1,1,:) 5 in test.txt
 !     integer, parameter :: col = 10 ! height (1,:,1) 3
 !     integer, parameter :: row = 2400 ! lines (:,1,1) 2
@@ -32,7 +34,7 @@ program mesh3d
     integer :: i0,j0,k0,i,j,n
     real, dimension(:,:), allocatable :: data1, data2, data3, data4, data5, data6
     real, dimension(:,:), allocatable :: data0
-    real, parameter :: pi = 3.14159265
+    real :: pi 
     real :: phi, phi0, cosphi, sinphi, cos2phi, sin2phi, cossinphi
     real :: rmax, zmin, zmax
 
@@ -69,6 +71,11 @@ program mesh3d
     j=11
     CALL get_command_argument(j, arg11)
     read(arg11,"(F7.2)")zmax
+    j=12
+    CALL get_command_argument(j, arg12)
+    read(arg12,"(A5)")coord
+
+    pi = 4*atan(1.D0)
 
 ! OUTPUT FILE NAME
     output_fname = trim(workpath)//trim("/")//trim(folder_name)//trim("/")//trim(folder_name)//trim(fname_re0(8:14))//trim(".silo")
@@ -196,125 +203,170 @@ program mesh3d
     read(99,*) ( (data6(j0,i0), i0=1,col,1), j0=1,row,1 ) 
     close(unit=99)
     print*, trim(filename), ' data is imported successfully.'
-
+    
     phi = phi0/180*pi
-    cosphi = cos(phi)
-    sinphi = sin(phi)
-    cos2phi = 2*cosphi*cosphi
-    sin2phi = 2-cos2phi
-    cossinphi = -2*cosphi*sinphi
-    do i0 = 1, row
-        do j0 = 1, col
-            data0(row-1+i0,j0) = data1(i0,j0)*cosphi + data2(i0,j0)*cos2phi + data3(i0,j0)*cossinphi - &
-                data4(i0,j0)*sinphi + data5(i0,j0)*cossinphi + data6(i0,j0)*sin2phi
+    if (phi0 >= 0 .and. phi0 <= 90) then
+        fac1 = 1
+        fac2 = -1
+    else if (phi0 > 90 .and. phi0 < 180) then
+        fac1 = -1
+        fac2 = -1
+    else if (phi0 >= 180 .and. phi0 <= 270) then
+        fac1 = -1
+        fac2 = 1
+    else
+        fac1 = 1
+        fac2 = 1
+    end if 
+    if (coord == "carte") then
+        cosphi = cos(phi)
+        sinphi = sin(phi)
+        cos2phi = 2*cosphi*cosphi
+        sin2phi = 2-cos2phi
+        cossinphi = -2*cosphi*sinphi
+        do i0 = 1, row
+            do j0 = 1, col
+                data0(row-1+i0,j0) = (data1(i0,j0)*cosphi + data2(i0,j0)*cos2phi + data3(i0,j0)*cossinphi)*fac1 &
+                    + ( - data4(i0,j0)*sinphi + data5(i0,j0)*cossinphi + data6(i0,j0)*sin2phi )*fac2
+            end do
         end do
-    end do
+    else
+        cosphi = cos(phi)*2
+        sinphi = -sin(phi)*2
+        do i0 = 1, row
+            do j0 = 1, col
+                data0(row-1+i0,j0) = data1(i0,j0) + data2(i0,j0)*cosphi + data3(i0,j0)*sinphi
+            end do
+        end do
+    end if
     phi = phi0/180*pi + pi
-    cosphi = cos(phi)
-    sinphi = sin(phi)
-    cos2phi = 2*cosphi*cosphi
-    sin2phi = 2-cos2phi
-    cossinphi = -2*cosphi*sinphi
-    do i0 = 2, row
-        do j0 = 1, col
-            data0(row+1-i0,j0) = data1(i0,j0)*cosphi + data2(i0,j0)*cos2phi + data3(i0,j0)*cossinphi - &
-                data4(i0,j0)*sinphi + data5(i0,j0)*cossinphi + data6(i0,j0)*sin2phi
+    if (phi0+180 >= 0 .and. phi0+180 <= 90) then
+        fac1 = 1
+        fac2 = -1
+    else if (phi0+180 > 90 .and. phi0+180 < 180) then
+        fac1 = -1
+        fac2 = -1
+    else if (phi0+180 >= 180 .and. phi0+180 <= 270) then
+        fac1 = -1
+        fac2 = 1
+    else
+        fac1 = 1
+        fac2 = 1
+    end if 
+    if (coord == "carte") then
+        cosphi = cos(phi)
+        sinphi = sin(phi)
+        cos2phi = 2*cosphi*cosphi
+        sin2phi = 2-cos2phi
+        cossinphi = -2*cosphi*sinphi
+        do i0 = 2, row
+            do j0 = 1, col
+                data0(row+1-i0,j0) = (data1(i0,j0)*cosphi + data2(i0,j0)*cos2phi + data3(i0,j0)*cossinphi)*fac1 &
+                    + ( - data4(i0,j0)*sinphi + data5(i0,j0)*cossinphi + data6(i0,j0)*sin2phi )*fac2
+            end do
         end do
-    end do
+    else
+        cosphi = cos(phi)*2
+        sinphi = -sin(phi)*2
+        do i0 = 2, row
+            do j0 = 1, col
+                data0(row+1-i0,j0) = data1(i0,j0) + data2(i0,j0)*cosphi + data3(i0,j0)*sinphi
+            end do
+        end do
+    end if
     do j0 = 1, col
         data0(row, j0) = 0.0
     end do
-
-! only right side fr, fphi
-!     do k0 = 1, hei
-!         phi = 0.0 + 2*pi/hei*(k0-1)
-!         cosphi = cos(phi)*2
-!         sinphi = -sin(phi)*2
-!         do i0 = 1, row
-!             do j0 = 1, col
-!                 data0(i0,j0) = data1(i0,j0) + data2(i0,j0)*cosphi + data3(i0,j0)*sinphi
-!             end do
-!         end do
-!     end do 
-
-! only right side fx, fy
-!     do k0 = 1, hei
-!         phi = 0.0 + 2*pi/hei*(k0-1)
-!         cosphi = cos(phi)
-!         sinphi = sin(phi)
-!         cos2phi = 2*cosphi*cosphi
-!         sin2phi = 2-cos2phi
-!         cossinphi = -2*cosphi*sinphi
-!         do i0 = 1, row
-!             do j0 = 1, col
-!                 data0(i0,j0) = data1(i0,j0)*cosphi + data2(i0,j0)*cos2phi + data3(i0,j0)*cossinphi - &
-!                 data4(i0,j0)*sinphi + data5(i0,j0)*cossinphi + data6(i0,j0)*sin2phi
-!             end do
-!         end do
-!     end do 
-
-    var = "fx"
+    
+    if (coord == "carte") then
+        var = "fx"
+    else
+        var = "fr"
+    end if
     call write_nodecent_quadvar(dbfile, coord_x, coord_z, data0, col, row, var)
 
     phi = phi0/180*pi
-    cosphi = cos(phi)
-    sinphi = sin(phi)
-    cos2phi = 2*cosphi*cosphi
-    sin2phi = 2-cos2phi
-    cossinphi = -2*cosphi*sinphi
-    do i0 = 1, row
-        do j0 = 1, col
-            data0(row-1+i0,j0) = data1(i0,j0)*sinphi - data2(i0,j0)*cossinphi - data3(i0,j0)*sin2phi + &
-                data4(i0,j0)*cosphi + data5(i0,j0)*cos2phi + data6(i0,j0)*cossinphi
+    if (phi0 >= 90 .and. phi0 <= 180) then
+        fac1 = 1
+        fac2 = -1
+    else if (phi0 > 180 .and. phi0 < 270) then
+        fac1 = -1
+        fac2 = -1
+    else if (phi0 >= 270 .and. phi0 < 360) then
+        fac1 = -1
+        fac2 = 1
+    else
+        fac1 = 1
+        fac2 = 1
+    end if 
+    if (coord == "carte") then
+        cosphi = cos(phi)
+        sinphi = sin(phi)
+        cos2phi = 2*cosphi*cosphi
+        sin2phi = 2-cos2phi
+        cossinphi = -2*cosphi*sinphi
+        do i0 = 1, row
+            do j0 = 1, col
+                data0(row-1+i0,j0) = (data1(i0,j0)*sinphi - data2(i0,j0)*cossinphi - data3(i0,j0)*sin2phi)*fac1 &
+                    + (data4(i0,j0)*cosphi + data5(i0,j0)*cos2phi + data6(i0,j0)*cossinphi)*fac2
+            end do
         end do
-    end do
+    else
+        cosphi = cos(phi)*2
+        sinphi = -sin(phi)*2
+        do i0 = 1, row
+            do j0 = 1, col
+                data0(row-1+i0,j0) = data4(i0,j0) + data5(i0,j0)*cosphi + data6(i0,j0)*sinphi
+            end do
+        end do
+    end if
     phi = phi0/180*pi + pi
-    cosphi = cos(phi)
-    sinphi = sin(phi)
-    cos2phi = 2*cosphi*cosphi
-    sin2phi = 2-cos2phi
-    cossinphi = -2*cosphi*sinphi
-    do i0 = 2, row
-        do j0 = 1, col
-            data0(row+1-i0,j0) = data1(i0,j0)*sinphi - data2(i0,j0)*cossinphi - data3(i0,j0)*sin2phi + &
-                data4(i0,j0)*cosphi + data5(i0,j0)*cos2phi + data6(i0,j0)*cossinphi
+    if (phi0+180 >= 90 .and. phi0+180 <= 180) then
+        fac1 = 1
+        fac2 = -1
+    else if (phi0+180 > 180 .and. phi0+180 < 270) then
+        fac1 = -1
+        fac2 = -1
+    else if (phi0+180 >= 270 .and. phi0+180 < 360) then
+        fac1 = -1
+        fac2 = 1
+    else
+        fac1 = 1
+        fac2 = 1
+    end if 
+    if (coord == "carte") then
+        cosphi = cos(phi)
+        sinphi = sin(phi)
+        cos2phi = 2*cosphi*cosphi
+        sin2phi = 2-cos2phi
+        cossinphi = -2*cosphi*sinphi
+        do i0 = 2, row
+            do j0 = 1, col
+                data0(row+1-i0,j0) = (data1(i0,j0)*sinphi - data2(i0,j0)*cossinphi - data3(i0,j0)*sin2phi)*fac1 &
+                    + (data4(i0,j0)*cosphi + data5(i0,j0)*cos2phi + data6(i0,j0)*cossinphi)*fac2
+            end do
         end do
-    end do
+    else
+        cosphi = cos(phi)*2
+        sinphi = -sin(phi)*2
+        do i0 = 2, row
+            do j0 = 1, col
+                data0(row+1-i0,j0) = data4(i0,j0) + data5(i0,j0)*cosphi + data6(i0,j0)*sinphi
+            end do
+        end do
+    end if
     do j0 = 1, col
         data0(row, j0) = 0.0
     end do
 
-! only right side fr, fphi
-!     do k0 = 1, hei
-!         phi = 0.0 + 2*pi/hei*(k0-1)
-!         cosphi = cos(phi)*2
-!         sinphi = -sin(phi)*2
-!         do i0 = 1, row
-!             do j0 = 1, col
-!                 data0(i0,j0) = data4(i0,j0) + data5(i0,j0)*cosphi + data6(i0,j0)*sinphi
-!             end do
-!         end do
-!     end do 
-
-! only right side fx, fy
-!     do k0 = 1, hei
-!         phi = 0.0 + 2*pi/hei*(k0-1)
-!         cosphi = cos(phi)
-!         sinphi = sin(phi)
-!         cos2phi = 2*cosphi*cosphi
-!         sin2phi = 2-cos2phi
-!         cossinphi = -2*cosphi*sinphi
-!         do i0 = 1, row
-!             do j0 = 1, col
-!                 data0(i0,j0) = data1(i0,j0)*sinphi - data2(i0,j0)*cossinphi - data3(i0,j0)*sin2phi + &
-!                 data4(i0,j0)*cosphi + data5(i0,j0)*cos2phi + data6(i0,j0)*cossinphi
-!             end do
-!         end do
-!     end do 
-
     deallocate(data1,data2,data3,data4,data5,data6)
 
-    var = "fy"
+    if (coord == "carte") then
+        var = "fy"
+    else
+        var = "fphi"
+    end if
+    
     call write_nodecent_quadvar(dbfile, coord_x, coord_z, data0, col, row, var)
 
 ! Close the Silo file.
@@ -335,7 +387,7 @@ subroutine write_nodecent_quadvar(dbfile, coord_x, coord_z, data0, col, row, var
 
     implicit none
 
-    include "silo_f9x.inc"
+    include "silo.inc"
 
     integer :: dbfile, err, ierr, dims(2), ndims, optlistid
     real, dimension(3) :: coord_x, coord_z

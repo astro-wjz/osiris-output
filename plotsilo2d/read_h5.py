@@ -1,11 +1,12 @@
 import h5py
+import pretty_errors
 import numpy as np
-from sys import argv
+import os
+import math
 
-script, n, workpath = argv
-n = int(n)  # number of h5 files
+n = 1 # number of h5 files
 # workpath = os.path.dirname(os.path.realpath(__file__))
-#workpath = "/public3/home/sc52879/astrowjz/osiris/astrowjz/cyl01/MS/FLD"
+workpath = "/Users/astrowjz/Desktop/read_h5"
 filepath = ["/MODE-0-RE/", "/MODE-1-RE/", "/MODE-1-IM/", "/MODE-2-RE/", "/MODE-2-IM/"]
 dset_name = ["b1_cyl_m", "b2_cyl_m", "b3_cyl_m", "e1_cyl_m", "e2_cyl_m", "e3_cyl_m"]
 mode_name = ["-0-re-", "-1-re-", "-1-im-", "-2-re-", "-2-im-"]
@@ -47,3 +48,4 @@ for j in range(0,6):
         outname = "%s"%(workpath) + "/" + "%s"%(out_name[2+j*3]) + "/" + "%s"%(out_name[2+j*3]) + "-" + "%s"%(number) + "%s"%(outtail)
         np.savetxt(outname, data)
         print("File", outname, "is written!")
+

@@ -1,8 +1,8 @@
 # name of the compiler 
-SILO_INC=/public3/home/sc52879/astrowjz/flash/softwares/test_gcchdf5/silo_install/include
-SILO_LIB=/public3/home/sc52879/astrowjz/flash/softwares/test_gcchdf5/silo_install/lib
-HDF5_INC=/public3/home/sc52879/astrowjz/flash/softwares/test_gcchdf5/hdf5gcc_install/include
-HDF5_LIB=/public3/home/sc52879/astrowjz/flash/softwares/test_gcchdf5/hdf5gcc_install/lib
+SILO_INC=/Users/astrowjz/Documents/Code/VisIt/silo_install/include
+SILO_LIB=/Users/astrowjz/Documents/Code/VisIt/silo_install/lib
+HDF5_INC=/Users/astrowjz/Documents/Code/hdf5-1.10.5/hdf5/include
+HDF5_LIB=/Users/astrowjz/Documents/Code/hdf5-1.10.5/hdf5/lib
 # SILO_INC=/Users/anweiming/work/codes/visit_data/silo-4.10.2-bsd/include
 # SILO_LIB=/Users/anweiming/work/codes/visit_data/silo-4.10.2-bsd/lib
 # HDF5_INC=/Users/anweiming/work/codes/hdf5-1.10.5/hdf5/include
@@ -11,10 +11,10 @@ HDF5_LIB=/public3/home/sc52879/astrowjz/flash/softwares/test_gcchdf5/hdf5gcc_ins
 # FC = mpif90 -c -O3 -I${SILO_INC} -I${HDF5_INC} 
 # CC = mpicc -c -O3
 # LINKER = mpif90 -O3 -L${SILO_LIB} -L${HDF5_LIB} -lsiloh5 -lhdf5
-FC = gfortran -fdefault-real-8 -fdefault-double-8 -c -O3 -I${SILO_INC} -I${HDF5_INC} 
-CC = gcc -c -O3
-LINKER = -fdefault-real-8 -fdefault-double-8  -O3 -L${SILO_LIB} -L${HDF5_LIB} -lz -lsiloh5 -ldl -lhdf5
-TEMP = gfortran
+FC=gfortran-10 -fdefault-real-8 -fdefault-double-8 -c -O3 -I${SILO_INC} -I${HDF5_INC} 
+CC=gcc-10 -c -O3 -I${SILO_INC} -I${HDF5_INC} 
+LINKER=gfortran-10 -fdefault-real-8 -fdefault-double-8  -O3 -L${SILO_LIB} -L${HDF5_LIB} -lsiloh5 -lhdf5
+
 # Objects list
 
 OBJS_BASE = \
@@ -26,7 +26,7 @@ OBJS = ${OBJS_BASE} ${OBJS_MAIN}
 
 # Linkage rule
 main :: ${OBJS} 
-	${TEMP} ${OBJS} -o test.e ${LINKER}
+	${LINKER} ${OBJS} -o test.e
 
 clean ::
 	rm *.o *.mod; rm test.e

@@ -12,3 +12,6 @@ Scripts for visualizing results of Osiris simulation code
 
 - ## plotsilo2d_server
      Format 2D h5 files to txt and silo, which is especially for cyl modes code, platform is Linux server.
+     
+- ## plot_cyl_ori
+     Composition cyl modes of Osiris code and output to png images, both for Linux server and MacOS, this script is only written with Python.

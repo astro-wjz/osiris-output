@@ -6,7 +6,7 @@ Scripts for visualizing results of Osiris simulation code
      
      This one is written with Python, **RECOMMAND** strongly to use this one, which can output png images and movies directly.
      
-- ## py_plot_cyl_densslice
+- ## py_plot_cyl_fldslice
      Program for visualizing hdf5 result files from Osiris cyl modes decomposition code, and combine a slice along z-driction at any angle. Especially for plotting field files. 
      
      This one is written with Python, **RECOMMAND** strongly to use this one, which can output png images and movies directly.
